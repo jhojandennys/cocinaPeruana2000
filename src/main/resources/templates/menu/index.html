@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head th:replace="layout/fragmentos :: fCabecera"></head>
+<body class="sb-nav-fixed">
+    <nav th:replace="layout/fragmentos :: fNav"></nav>
+    <div id="layoutSidenav">
+        <div th:replace="layout/fragmentos :: fMenu"></div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container px-4 py-4">
+
+                    <div th:if="${mensaje != null}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Mensaje!</strong> <span th:text="${mensaje}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Formulario de Registro -->
+                    <form th:action="@{/menu/guardar}" th:object="${menu}" method="post">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                Registrar Menú
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Nombre del Menú:</label>
+                                        <input th:field="*{nombre}" type="text" class="form-control" placeholder="Ingrese nombre"/>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Fecha:</label>
+                                        <input th:field="*{fecha}" type="date" class="form-control"/>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Plato:</label>
+                                        <select th:field="*{plato.id}" class="form-select">
+                                            <option value="">Seleccione un plato</option>
+                                            <option th:each="plato : ${listaPlato}" th:value="${plato.id}" th:text="${plato.nombre}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Precio:</label>
+                                        <input th:field="*{precio}" type="text" class="form-control" placeholder="Ingrese precio"/>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12 text-center">
+                                        <button type="submit" class="btn btn-success">
+                                            Guardar Menú
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Lista de Menús Registrados -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <i class="fa-solid fa-floppy-disk"></i> Menús Registrados
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fa-solid fa-barcode"></i> Código</th>
+                                            <th><i class="fa-regular fa-file-alt"></i> Nombre</th>
+                                            <th><i class="fa-regular fa-calendar"></i> Fecha</th>
+                                            <th><i class="fa-solid fa-utensils"></i> Plato</th>
+                                            <th><i class="fa-solid fa-dollar-sign"></i> Precio</th>
+                                            <th colspan="2" class="text-center"><i class="fa-solid fa-tools"></i> Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="menu : ${listaMenu}">
+                                            <td th:text="${menu.id}"></td>
+                                            <td th:text="${menu.nombre}"></td>
+                                            <td th:text="${#dates.format(menu.fecha, 'yyyy-MM-dd')}"></td>
+                                            <td th:text="${menu.plato.nombre}"></td>
+                                            <td th:text="${menu.precio}"></td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-warning editarMenu" 
+                                                    th:data-id="${menu.id}"    
+                                                    th:data-nombre="${menu.nombre}"
+                                                    th:data-fecha="${#dates.format(menu.fecha, 'yyyy-MM-dd')}"
+                                                    th:data-plato="${menu.plato.id}"
+                                                    th:data-precio="${menu.precio}">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                    Editar
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                <a th:href="@{/menu/eliminar/}+${menu.id}" class="btn btn-danger" onclick="return confirm('¿Desea eliminar el menú?')">
+                                                    <i class="fa-solid fa-trash-can" style="color: #51501f;"></i>
+                                                    Eliminar
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Modal de Edición -->
+                <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Menú</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+            
+                            <form th:action="@{/menu/guardar}" th:object="${menu}" method="post">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <input type="hidden" th:field="*{id}" id="txtId" name="id">
+                                            <label for="txtNombre">Nombre del Menú:</label>
+                                            <input th:field="*{nombre}" type="text" id="txtNombre" class="form-control" placeholder="Ingrese nombre">
+                                        </div>
+                                    </div>
+            
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtFecha">Fecha:</label>
+                                            <input th:field="*{fecha}" type="date" id="txtFecha" class="form-control" placeholder="Ingrese fecha">
+                                        </div>
+                                    </div>
+            
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtPrecio">Precio:</label>
+                                            <input th:field="*{precio}" type="number" id="txtPrecio" class="form-control" placeholder="Ingrese precio">
+                                        </div>
+                                    </div>
+            
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtPlato">Plato:</label>
+                                            <select th:field="*{plato.id}" class="form-control">
+                                                <option value="">Seleccione un Plato</option>
+                                                <!-- Itera sobre la lista de platos y genera opciones -->
+                                                <option th:each="plato : ${listaPlato}" th:value="${plato.id}" th:text="${plato.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+            <footer th:replace="layout/fragmentos :: fFooter"></footer>
+        </div>
+    </div>
+    <div th:replace="layout/fragmentos :: fLibrerias"></div>
+    <script th:src="@{/JS/libreriaMenu.js}"></script>
+</body>
+</html>

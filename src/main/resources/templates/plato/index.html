@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/fragmentos :: fCabecera"></head>
+<body class="sb-nav-fixed">
+    <nav th:replace="layout/fragmentos :: fNav"></nav>
+    <div id="layoutSidenav">
+        <div th:replace="layout/fragmentos :: fMenu"></div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container px-4 py-4">
+
+                    <div th:if="${mensaje != null}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Mensaje!</strong> <span th:text="${mensaje}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Botón para abrir el modal de registro -->
+                    <div class="col-2 text-center">
+                        <button  sec:authorize="hasAnyAuthority('USER','CREATOR','EDITOR','ADMIN')" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRegistroPlato">
+                            Registrar Plato
+                        </button>
+                    </div>
+                    <br>
+
+                    <!-- Lista de platos registrados -->
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-floppy-disk"></i> Platos Registrados
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fa-barcode"></i> Código</th>
+                                            <th><i class="fa-file-alt"></i> Nombre</th>
+                                            <th><i class="fa-regular fa-comment"></i> Descripción</th>
+                                            <th><i class="fa-solid fa-dollar-sign"></i> Precio</th>
+                                            <th><i class="fa-regular fa-user"></i> Empleado</th>
+                                            <th colspan="2" class="text-center"><i class="fa-tools"></i> Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="plato : ${listaPlato}">
+                                            <td th:text="${plato.id}"></td>
+                                            <td th:text="${plato.nombre}"></td>
+                                            <td th:text="${plato.descripcion}"></td>
+                                            <td th:text="${plato.precio}"></td>
+                                            <td th:text="${plato.empleado.nombre}"></td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-warning editarPlato" 
+                                                    th:data-id="${plato.id}"    
+                                                    th:data-nombre="${plato.nombre}"
+                                                    th:data-descripcion="${plato.descripcion}"
+                                                    th:data-precio="${plato.precio}"
+                                                    th:data-empleado="${plato.empleado.id}">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                    Editar
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                <a sec:authorize="hasAnyAuthority('ADMIN','EDITOR')" th:href="@{/plato/eliminar/}+${plato.id}" class="btn btn-danger" onclick="return confirm('¿Desea eliminar el plato?')">
+                                                    <i class="fa-solid fa-trash-can" style="color: #51501f;"></i>
+                                                    Eliminar
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Modal de Registro -->
+                <div class="modal fade" id="modalRegistroPlato" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Nuevo Plato</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <!-- Formulario para registrar nuevos platos -->
+                            <form th:action="@{/plato/guardar}" th:object="${plato}" method="post">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label>Nombre del Plato</label>
+                                            <input th:field="*{nombre}" type="text" class="form-control" placeholder="Ingrese Nombre"/>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label>Descripción del Plato</label>
+                                            <input th:field="*{descripcion}" type="text" class="form-control" placeholder="Ingrese Descripción"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label>Precio del Plato</label>
+                                            <input th:field="*{precio}" type="number" class="form-control" placeholder="Ingrese Precio"/>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label>Empleado</label>
+                                            <select th:field="*{empleado.id}" class="form-select">
+                                                <option value="">Seleccione un empleado</option>
+                                                <option th:each="empleado : ${listaEmpleado}" th:value="${empleado.id}" th:text="${empleado.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-12 text-center">
+                                            <button type="submit" class="btn btn-success">Registrar Plato</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal de Edición -->
+                <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Plato</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+            
+                            <form th:action="@{/plato/guardar}" th:object="${plato}" method="post">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <input type="hidden" th:field="*{id}" id="txtId" name="id"/>
+                                            <label for="txtNombre">Nombre del Plato:</label>
+                                            <input th:field="*{nombre}" type="text" id="txtNombre" class="form-control" placeholder="Ingrese nombre"/>
+                                        </div>
+                                    </div>
+            
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtDescripcion">Descripción del Plato:</label>
+                                            <input th:field="*{descripcion}" type="text" id="txtDescripcion" class="form-control" placeholder="Ingrese descripción"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtPrecio">Precio del Plato:</label>
+                                            <input th:field="*{precio}" type="number" id="txtPrecio" class="form-control" placeholder="Ingrese precio"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtEmpleado">Empleado:</label>
+                                            <select th:field="*{empleado.id}" class="form-control">
+                                                <option value="">Seleccione un Empleado</option>
+                                                <!-- Itera sobre la lista de empleados y genera opciones -->
+                                                <option th:each="empleado : ${listaEmpleado}" th:value="${empleado.id}" th:text="${empleado.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+            
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+            <footer th:replace="layout/fragmentos :: fFooter"></footer>
+        </div>
+    </div>
+    <div th:replace="layout/fragmentos :: fLibrerias"></div>
+    <script th:src="@{/JS/libreriaPlato.js}"></script>
+</body>
+</html>

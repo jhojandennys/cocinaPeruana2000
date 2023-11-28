@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/fragmentos :: fCabecera"></head>
+<body class="sb-nav-fixed">
+    <nav th:replace="layout/fragmentos :: fNav"></nav>
+    <div id="layoutSidenav">
+        <div th:replace="layout/fragmentos :: fMenu"></div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container px-4 py-4">
+
+                    <div th:if="${mensaje != null}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Mensaje!</strong> <span th:text="${mensaje}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Botón para abrir el modal de registro -->
+                    <div class="col-2 text-center">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRegistroPedido">
+                            Registrar Pedido
+                        </button>
+                    </div>
+                    <br>
+
+                    <!-- Lista de pedidos registrados -->
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-floppy-disk"></i> Pedidos Registrados
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fa-barcode"></i> Código</th>
+                                            <th><i class="fa-calendar"></i> Fecha</th>
+                                            <th><i class="fa-utensils"></i> Plato</th>
+                                            <th><i class="fa-solid fa-box"></i> Cantidad</th>
+                                            <th><i class="fa-solid fa-dollar-sign"></i> Precio Unitario</th>
+                                            <th><i class="fa-chair"></i> Mesa</th>
+                                            <th><i class="fa-solid fa-dollar-sign"></i> Precio Total</th>
+                                            <th><i class="fa-regular fa-comment"></i> Estado</th>
+                                            <th colspan="2" class="text-center"><i class="fa-tools"></i> Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="pedido : ${listaPedido}">
+                                            <td th:text="${pedido.id}"></td>
+                                            <td th:text="${pedido.fecha}"></td>
+                                            <td th:text="${pedido.detalleMenu.plato.nombre}"></td>
+                                            <td th:text="${pedido.cantidad}"></td>
+
+                                            <td th:text="${pedido.detalleMenu.plato.precio}"></td>
+                                            <td th:text="${pedido.mesa}"></td>
+                                            <td th:text="${pedido.preciototal}"></td>
+                                            <td th:text="${pedido.estado}"></td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-warning editarPedido" 
+                                                    th:data-id="${pedido.id}"    
+                                                    th:data-fecha="${pedido.fecha}"
+                                                    th:data-precio="${pedido.preciototal}"
+                                                    th:data-cliente="${pedido.cliente}"
+                                                    th:data-mesa="${pedido.mesa}"
+                                                    th:data-estado="${pedido.estado}">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                    Editar
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                <a th:href="@{/pedido/eliminar/}+${pedido.id}" class="btn btn-danger" onclick="return confirm('¿Desea eliminar el pedido?')">
+                                                    <i class="fa-solid fa-trash-can" style="color: #51501f;"></i>
+                                                    Eliminar
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Modal de Registro -->
+                <div class="modal fade" id="modalRegistroPedido" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Nuevo Pedido</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <!-- Formulario para registrar nuevos pedidos -->
+                            <form th:action="@{/pedido/guardar}" th:object="${pedido}" method="post">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label>Fecha del Pedido</label>
+                                            <input th:field="*{fecha}" type="date" class="form-control"/>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label>Cantidad</label>
+                                            <input th:field="*{cantidad}" type="number" class="form-control" placeholder="Ingrese Cantidad"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label>Precio Total del Pedido</label>
+                                            <input th:field="*{preciototal}" type="number" class="form-control" placeholder="Ingrese Precio Total"/>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label>Cliente del Pedido</label>
+                                            <input th:field="*{cliente}" type="text" class="form-control" placeholder="Ingrese Cliente"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label>Mesa del Pedido</label>
+                                            <input th:field="*{mesa}" type="text" class="form-control" placeholder="Ingrese Mesa"/>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <label>Estado del Pedido</label>
+                                                <select th:field="*{estado}" class="form-select">
+                                                    <option value="Registrado">Registrado</option>
+                                                    <option value="PorEntregar">Por Entregar</option>
+                                                    <option value="Entregado">Entregado</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label>Detalle del Menú</label>
+                                            <select th:field="*{detalleMenu.id}" class="form-select">
+                                                <option value="">Seleccione un detalle de menú</option>
+                                                <option th:each="detalle : ${listaDetalleMenu}" th:value="${detalle.id}" th:text="${detalle.plato.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-12 text-center">
+                                            <button type="submit" class="btn btn-success">Registrar Pedido</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal de Edición para Pedido -->
+                <div class="modal fade" id="modalEditarPedido" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Pedido</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <form th:action="@{/pedido/guardar}" th:object="${pedido}" method="post">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <input type="hidden" th:field="*{id}" id="txtId" name="id"/>
+                                            <label for="txtFecha">Fecha del Pedido:</label>
+                                            <input th:field="*{fecha}" type="date" id="txtFecha" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtPrecioTotal">Precio Total del Pedido:</label>
+                                            <input th:field="*{preciototal}" type="number" id="txtPrecioTotal" class="form-control" placeholder="Ingrese precio total"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtCliente">Cliente del Pedido:</label>
+                                            <input th:field="*{cliente}" type="text" id="txtCliente" class="form-control" placeholder="Ingrese cliente"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtMesa">Mesa del Pedido:</label>
+                                            <input th:field="*{mesa}" type="text" id="txtMesa" class="form-control" placeholder="Ingrese mesa"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtCantidad">Cantidad:</label>
+                                            <input th:field="*{cantidad}" type="number" id="txtCantidad" class="form-control" placeholder="Ingrese cantidad"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="txtEstado">Estado del Pedido:</label>
+                                            <select th:field="*{estado}" id="txtEstado" class="form-select">
+                                                <option value="Registrado">Registrado</option>
+                                                <option value="PorEntregar">Por Entregar</option>
+                                                <option value="Entregado">Entregado</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Agregar más campos según sea necesario -->
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+            </main>
+            <footer th:replace="layout/fragmentos :: fFooter"></footer>
+        </div>
+    </div>
+    <div th:replace="layout/fragmentos :: fLibrerias"></div>
+    <script th:src="@{/JS/libreriaPedido.js}"></script>
+</body>
+</html>

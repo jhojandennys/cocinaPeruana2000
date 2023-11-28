@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head th:replace="layout/fragmentos :: fCabecera"></head>
+<body class="sb-nav-fixed">
+    <nav th:replace="layout/fragmentos :: fNav"></nav>
+    <div id="layoutSidenav">
+        <div th:replace="layout/fragmentos :: fMenu"></div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container mt-3">
+                    <!-- Botón para abrir el modal de registro -->
+                    <div class="col-2 text-center">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRegistroEmpleado">
+                            Registrar Empleado
+                        </button>
+                    </div>
+                    <br>
+
+                    <!-- Lista de empleados registrados -->
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-floppy-disk"></i> Empleados registrados
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <th>Código</th>
+                                        <th>Nombre</th>
+                                        <th>Correo Electrónico</th>
+                                        <th>Rol</th>
+                                        <th></th>
+                                        <th></th>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="empleado : ${listaEmpleado}">
+                                            <td th:text="${empleado.id}"></td>
+                                            <td th:text="${empleado.nombre}"></td>
+                                            <td th:text="${empleado.correo}"></td>
+                                            <td th:text="${empleado.rol.nombre}"></td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-warning editarEmpleado" 
+                                                    th:data-id="${empleado.id}"
+                                                    th:data-nombre="${empleado.nombre}"
+                                                    th:data-correo="${empleado.correo}"
+                                                    th:data-rol="${empleado.rol.id}">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                    Editar
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                <a th:href="@{/empleado/eliminar/}+${empleado.id}" class="btn btn-danger" onclick="return confirm('¿Desea eliminar el empleado?')">
+                                                    <i class="fa-solid fa-trash-can" style="color: #51501f;"></i>
+                                                    Eliminar
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer th:replace="layout/fragmentos :: fFooter"></footer>
+        </div>
+    </div>
+        <!-- Modal de Edición -->
+    <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Empleado</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form th:action="@{/empleado/guardar}" th:object="${empleado}" method="post" id="modalEditarForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <input type="hidden" id="txtId" name="id" />
+                                <label>Nombre del Empleado:</label>
+                                <input type="text" name="nombre" id="txtNombre" class="form-control" placeholder="Ingrese nombre" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label>Correo Electrónico:</label>
+                                <input type="text" name="correo" id="txtCorreo" class="form-control" placeholder="Ingrese correo" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label>Contraseña:</label>
+                                <input type="password" name="contraseña" id="txtContraseña" class="form-control" placeholder="Ingrese contraseña" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="rolSelect">Rol del Empleado:</label>
+                                <select th:field="*{rol.id}" id="rolSelect" class="form-select">
+                                    <option value="">Seleccione un Rol</option>
+                                    <!-- Itera sobre la lista de roles y genera opciones -->
+                                    <option th:each="rol : ${listaRol}" th:value="${rol.id}" th:text="${rol.nombre}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+      <!-- Modal de Registro -->
+    <div class="modal fade" id="modalRegistroEmpleado" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Nuevo Empleado</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Formulario para registrar nuevos empleados -->
+                <form th:action="@{/empleado/guardar}" th:object="${empleado}" method="post">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label>Nombre del Empleado</label>
+                                <input th:field="*{nombre}" type="text" class="form-control" placeholder="Ingrese Nombre"/>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label>Correo Electrónico</label>
+                                <input th:field="*{correo}" type="text" class="form-control" placeholder="Ingrese Correo"/>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label>Contraseña</label>
+                                <input th:field="*{contraseña}" type="password" class="form-control" placeholder="Ingrese Contraseña"/>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label>Rol del Empleado</label>
+                                <select th:field="*{rol}" class="form-select">
+                                    <option th:each="rol : ${listaRol}" th:value="${rol.id}" th:text="${rol.nombre}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-success">Registrar Empleado</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="layout/fragmentos :: fLibrerias"></div>
+    <script th:src="@{/JS/libreriaEmpleado.js}"></script>
+</body>
+</html>
